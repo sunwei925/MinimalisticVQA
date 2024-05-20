@@ -38,10 +38,10 @@ class VideoDataset(data.Dataset):
         Raises:
             ValueError: If the dataset name is not supported.
         """
-        if 'KoNViD-1k' in dataset_name or 'youtube_ugc' in dataset_name or 'LIVEVQC' in dataset_name or \
+        if 'KoNViD1k' in dataset_name or 'youtube_ugc' in dataset_name or 'LIVEVQC' in dataset_name or \
             'LBVD' in dataset_name or 'LIVEYTGaming' in dataset_name:
             dataInfo = scio.loadmat(filename_path)
-            if 'KoNViD-1k' in dataset_name:
+            if 'KoNViD1k' in dataset_name:
                 video_names = [dataInfo['video_names'][i][0][0] for i in range(len(dataInfo['video_names']))]
                 scores = [dataInfo['scores'][i][0] for i in range(len(dataInfo['scores']))]
             elif 'youtube_ugc' in dataset_name:
@@ -133,7 +133,7 @@ class VideoDataset(data.Dataset):
         Raises:
             None
         """
-        if 'KoNViD-1k' in self.dataset_name or 'LIVEVQC' in self.dataset_name or 'youtube_ugc' in self.dataset_name \
+        if 'KoNViD1k' in self.dataset_name or 'LIVEVQC' in self.dataset_name or 'youtube_ugc' in self.dataset_name \
            or 'LIVEYTGaming' in self.dataset_name or 'LBVD' in self.dataset_name or 'LIVE_Qualcomm' in self.dataset_name:
             video_name = self.video_names[idx]
             video_name_str = video_name[:-4]
@@ -152,7 +152,7 @@ class VideoDataset(data.Dataset):
         video_width_crop = self.crop_size
        
 
-        if 'KoNViD-1k' in self.dataset_name or 'LIVEYTGaming' in self.dataset_name or 'LSVQ' in self.dataset_name \
+        if 'KoNViD1k' in self.dataset_name or 'LIVEYTGaming' in self.dataset_name or 'LSVQ' in self.dataset_name \
             or 'LIVEVQC' in self.dataset_name or 'LIVEYTGaming' in self.dataset_name or 'LBVD' in self.dataset_name:
             video_length_read = 8
         elif 'LIVE_Qualcomm' in self.dataset_name:
