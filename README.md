@@ -1,9 +1,9 @@
 # MinimalisticVQA
 This is a repository for the models proposed in the paper "Analysis of video quality datasets via design of minimalistic video quality models". [TPAMI Version](https://ieeexplore.ieee.org/abstract/document/10499199) [Arxiv Version](https://arxiv.org/abs/2307.13981)
 
-```
+
 Blind video quality assessment (BVQA) plays an indispensable role in monitoring and improving the end-users' viewing experience in various real-world video-enabled media applications. As an experimental field, the improvements of BVQA models have been measured primarily on a few human-rated VQA datasets. Thus, it is crucial to gain a better understanding of existing VQA datasets in order to properly evaluate the current progress in BVQA. Towards this goal, we conduct a first-of-its-kind computational analysis of VQA datasets via designing minimalistic BVQA models. By minimalistic, we restrict our family of BVQA models to build only upon basic blocks: a video preprocessor (for aggressive spatiotemporal downsampling), a spatial quality analyzer, an optional temporal quality analyzer, and a quality regressor, all with the simplest possible instantiations. By comparing the quality prediction performance of different model variants on eight VQA datasets with realistic distortions, we find that nearly all datasets suffer from the easy dataset problem of varying severity, some of which even admit blind image quality assessment (BIQA) solutions. We additionally justify our claims by comparing our model generalization capabilities on these VQA datasets, and by ablating a dizzying set of BVQA design choices related to the basic building blocks. Our results cast doubt on the current progress in BVQA, and meanwhile shed light on good practices of constructing next-generation VQA datasets and models.
-```
+
 
 ### Model Definitions
 | Model | Spatial Quality Analyzer | Temporal Quality Analyzer |
