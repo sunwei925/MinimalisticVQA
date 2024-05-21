@@ -317,7 +317,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str)
     parser.add_argument('--model_name', type=str)
     # training parameters
-    parser.add_argument('--datainfo', type=str)
+    parser.add_argument('--datainfo', type=str, default=None)
     parser.add_argument('--videos_dir', type=str)
     parser.add_argument('--feature_dir', type=str)
     parser.add_argument('--lr', type=float, default=1e-5)

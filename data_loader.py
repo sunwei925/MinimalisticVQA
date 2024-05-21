@@ -49,7 +49,7 @@ class VideoDataset(data.Dataset):
                 scores = [dataInfo['scores'][0][i] for i in range(len(dataInfo['scores'][0]))]
             elif 'LIVEVQC' in dataset_name:
                 video_names = [dataInfo['video_list'][i][0][0] for i in range(len(dataInfo['video_list']))]
-                video_names = [dataInfo['mos'][i][0] for i in range(len(dataInfo['mos']))]
+                scores = [dataInfo['mos'][i][0] for i in range(len(dataInfo['mos']))]
             elif 'LBVD' in dataset_name:
                 video_names = [dataInfo['video_names'][i][0][0] for i in range(len(dataInfo['video_names']))]
                 video_names = [dataInfo['scores'][i][0] for i in range(len(dataInfo['scores']))]
