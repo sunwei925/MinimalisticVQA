@@ -581,6 +581,61 @@ class Model_X(nn.Module):
             
         return x
 
+# Model (X): adding the temporal analyzer to Model (VIII) (load the weights when during the training)
+class Model_XI(nn.Module):
+    def __init__(self):
+        super(Model_XI, self).__init__()
+
+        model = timm.create_model('swin_base_patch4_window12_384_in22k', pretrained=True)
+        model.head = Identity()
+
+        # spatial quality analyzer
+        self.feature_extraction = model
+
+        # quality regressor
+        self.quality = self.quality_regression(1024+256, 128, 1)
+
+    def quality_regression(self,in_channels, middle_channels, out_channels):
+        regression_block = nn.Sequential(
+            nn.Linear(in_channels, middle_channels),
+            nn.Linear(middle_channels, out_channels),          
+        )
+
+        return regression_block
+
+    def forward(self, x, x_temporal_featurs):
+
+        # x size: batch x frames x 3 x height x width
+        x_size = x.shape
+
+        # x_temporal_featurs size: batch x frames x 2048
+        x_temporal_featurs_size = x_temporal_featurs.shape
+
+        # x size: (batch * frames) x 3 x height x width
+        x = x.view(-1, x_size[2], x_size[3], x_size[4])
+
+        # x_temporal_featurs size: (batch * frames) x 256
+        x_temporal_featurs = x_temporal_featurs.view(-1, x_temporal_featurs_size[2])
+        
+        
+        
+        x = self.feature_extraction(x)
+
+        x = torch.flatten(x, 1)
+
+        # x: (batch * frames) x (channel + 256)
+        x = torch.cat((x, x_temporal_featurs), dim = 1)
+
+        x = self.quality(x)
+        
+        # x: batch x frames
+        x = x.view(x_size[0], x_size[1])
+
+        # x: batch
+        x = torch.mean(x, dim = 1)
+            
+        return x
+
 if __name__ == '__main__':
     import argparse
 
