@@ -38,6 +38,8 @@ class VideoDataset(data.Dataset):
         Raises:
             ValueError: If the dataset name is not supported.
         """
+
+
         if 'KoNViD1k' in dataset_name or 'youtube_ugc' in dataset_name or 'LIVEVQC' in dataset_name or \
             'LBVD' in dataset_name or 'LIVEYTGaming' in dataset_name:
             dataInfo = scio.loadmat(filename_path)
@@ -67,6 +69,10 @@ class VideoDataset(data.Dataset):
             video_names = [video_name.replace('yuv', 'mp4') for video_name in dataInfo['file_names'].tolist()]
             scores = dataInfo['MOS'].tolist()
             video_names, scores = self.load_subset_video_names_scores(dataset_name, video_names, scores, seed)
+        elif dataset_name == 'LSVQ_train_all':
+            dataInfo = pd.read_csv(filename_path)
+            video_names = dataInfo['name'].tolist()
+            scores = dataInfo['mos'].tolist()
         elif dataset_name == 'LSVQ_train':
             dataInfo = pd.read_csv(filename_path)
             video_names = dataInfo['name'].tolist()[:int(len(dataInfo) * 0.8)]

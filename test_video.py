@@ -11,6 +11,12 @@ from PIL import Image
 
 from torchvision import transforms
 
+
+def logistic_func(X, bayta1, bayta2, bayta3, bayta4):
+    logisticPart = 1 + np.exp(np.negative(np.divide(X - bayta3, np.abs(bayta4))))
+    yhat = bayta2 + np.divide(bayta1 - bayta2, logisticPart)
+    return yhat
+
 def video_processing_spatial(video_name, resize, video_number_min):
 
     video_name = video_name
@@ -141,7 +147,7 @@ def video_processing_motion(video_name, video_number_min):
 
     video_clip = int(video_length/video_frame_rate)
     
-    video_clip_min = video_number_min
+    video_clip_min = max(video_clip, video_number_min)
 
     video_length_clip = 32
 
@@ -232,6 +238,8 @@ def main(config):
         outputs = model(video_dist_spatial, feature_motion)
         
         y_val = outputs.item()
+        popt = [156.32454676, -43.63788251,  -0.39209656,   4.05073166]
+        y_val = logistic_func(y_val, *popt)
 
         print('The video name: ' + config.video_name)
         print('The quality socre: {:.4f}'.format(y_val))

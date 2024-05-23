@@ -20,6 +20,14 @@ def fit_function(y_label, y_output):
     
     return y_output_logistic
 
+def fit_function_regression_values(y_label, y_output):
+    beta = [np.max(y_label), np.min(y_label), np.mean(y_output), 0.5]
+    popt, _ = curve_fit(logistic_func, y_output, \
+        y_label, p0=beta, maxfev=100000000)
+    y_output_logistic = logistic_func(y_output, *popt)
+    
+    return y_output_logistic, popt
+
 
 def performance_fit(y_label, y_output):
     y_output_logistic = fit_function(y_label, y_output)
@@ -29,6 +37,15 @@ def performance_fit(y_label, y_output):
     RMSE = np.sqrt(((y_output_logistic-y_label) ** 2).mean())
 
     return PLCC, SRCC, KRCC, RMSE
+
+def performance_fit_regression_values(y_label, y_output):
+    y_output_logistic, popt = fit_function_regression_values(y_label, y_output)
+    PLCC = stats.pearsonr(y_output_logistic, y_label)[0]
+    SRCC = stats.spearmanr(y_output, y_label)[0]
+    KRCC = stats.stats.kendalltau(y_output, y_label)[0]
+    RMSE = np.sqrt(((y_output_logistic-y_label) ** 2).mean())
+
+    return PLCC, SRCC, KRCC, RMSE, popt
 
 
 

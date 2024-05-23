@@ -20,7 +20,8 @@ This is a repository for the models proposed in the paper "Analysis of video qua
 
 - [CVD2014](https://zenodo.org/records/2646315)
 - [LIVE-Qualcomm](https://live.ece.utexas.edu/research/incaptureDatabase/index.html)
-- [KoNViD-1k](https://database.mmsp-kn.de/konvid-1k-database.html): Please note that the video names in the file data/KoNViD-1k_data.mat are not in the same format as those in the official released version. You can download the version of KoNViD-1k that we used to match the video names.
+- [KoNViD-1k](https://database.mmsp-kn.de/konvid-1k-database.html): The video names in the file data/KoNViD-1k_data.mat are not in the same format as those in the official released version. You can download the version of [KoNViD-1k](https://pan.baidu.com/s/1b3mMP2hHgw_8h1mnNFSNKg) (password: 1adp) that we used to match the video names.
+提取码：1adp
 - [LIVE-VQC](https://live.ece.utexas.edu/research/LIVEVQC/index.html)
 - [YouTube-UGC](https://media.withyoutube.com/): The videos in YouTube-UGC are dynamically updated, so the videos you download may be slightly different from those used in this paper.
 - [LBVD](https://github.com/cpf0079/LBVD)
