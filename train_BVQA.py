@@ -51,6 +51,8 @@ def main(config):
             model = VQAModels.Model_IX()
         elif config.model_name == 'Model_X':
             model = VQAModels.Model_X()
+        elif config.model_name == 'Model_XI':
+            model = VQAModels.Model_XI()
 
         if config.model_name in ['Model_II', 'Model_V', 'Model_VIII', 'Model_X']:
             print('using the pretrained model')
@@ -147,7 +149,7 @@ def main(config):
                 temporal_features = temporal_features.to(device)
                 labels = mos.to(device).float()
                 
-                if config.model_name in ['Model_IV', 'Model_V', 'Model_VI', 'Model_IX', 'Model_X']:
+                if config.model_name in ['Model_IV', 'Model_V', 'Model_VI', 'Model_IX', 'Model_X', 'Model_XI']:
                     outputs = model(video, temporal_features)
                 else:
                     outputs = model(video)
@@ -189,7 +191,7 @@ def main(config):
                     video = video.to(device)
                     temporal_features = temporal_features.to(device)
                     label[i] = mos.item()
-                    if config.model_name in ['Model_IV', 'Model_V', 'Model_VI', 'Model_IX', 'Model_X']:
+                    if config.model_name in ['Model_IV', 'Model_V', 'Model_VI', 'Model_IX', 'Model_X', 'Model_XI']:
                         outputs = model(video, temporal_features)
                     else:
                         outputs = model(video)
@@ -209,7 +211,7 @@ def main(config):
                     video = video.to(device)
                     temporal_features = temporal_features.to(device)
                     label[i] = mos.item()
-                    if config.model_name in ['Model_IV', 'Model_V', 'Model_VI', 'Model_IX', 'Model_X']:
+                    if config.model_name in ['Model_IV', 'Model_V', 'Model_VI', 'Model_IX', 'Model_X', 'Model_XI']:
                         outputs = model(video, temporal_features)
                     else:
                         outputs = model(video)
@@ -230,7 +232,7 @@ def main(config):
                         video = video.to(device)
                         temporal_features = temporal_features.to(device)
                         label_1080p[i] = mos.item()
-                        if config.model_name in ['Model_IV', 'Model_V', 'Model_VI', 'Model_IX', 'Model_X']:
+                        if config.model_name in ['Model_IV', 'Model_V', 'Model_VI', 'Model_IX', 'Model_X', 'Model_XI']:
                             outputs = model(video, temporal_features)
                         else:
                             outputs = model(video)
@@ -259,17 +261,17 @@ def main(config):
                             os.remove(old_mat_name)
 
                     save_model_name = os.path.join(config.ckpt_path, config.model_name + '_' + \
-                        config.dataset + '_' + '_NR_v'+ str(config.exp_version) \
+                        config.dataset + '_NR_v'+ str(config.exp_version) \
                             + '_epoch_%d_SRCC_%f.pth' % (epoch + 1, test_SRCC))
 
                     save_mat_name = os.path.join(config.ckpt_path, config.model_name + '_' + \
-                        config.dataset + '_' + '_NR_v'+ str(config.exp_version) \
+                        config.dataset + '_NR_v'+ str(config.exp_version) \
                             + '_epoch_%d_SRCC_%f.mat' % (epoch + 1, test_SRCC))
                     if config.dataset == 'LSVQ':
                         scio.savemat(save_mat_name, {'y_output':y_output, 'label':label, 'y_output_1080p':y_output_1080p, 'label_1080p':label_1080p})
                     else:
                         scio.savemat(save_mat_name, {'y_output':y_output, 'label':label})
-                    torch.save(model.state_dict(), save_model_name)
+                    torch.save(model.module.state_dict(), save_model_name)
                     old_save_name = save_model_name
                     old_mat_name = save_mat_name
 
@@ -346,3 +348,16 @@ if __name__ == '__main__':
     np.random.seed(config.random_seed)
     random.seed(config.random_seed)
     main(config)
+
+
+
+
+
+
+
+
+
+
+
+
+

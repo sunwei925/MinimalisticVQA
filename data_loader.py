@@ -54,11 +54,12 @@ class VideoDataset(data.Dataset):
                 scores = [dataInfo['mos'][i][0] for i in range(len(dataInfo['mos']))]
             elif 'LBVD' in dataset_name:
                 video_names = [dataInfo['video_names'][i][0][0] for i in range(len(dataInfo['video_names']))]
-                video_names = [dataInfo['scores'][i][0] for i in range(len(dataInfo['scores']))]
+                scores = [dataInfo['scores'][i][0] for i in range(len(dataInfo['scores']))]
             elif 'LIVEYTGaming' in dataset_name:
                 video_names = [dataInfo['video_list'][i][0][0]+'.mp4' for i in range(len(dataInfo['video_list']))]
-                video_names = [dataInfo['MOS'][i][0] for i in range(len(dataInfo['MOS']))]
-            video_names, scores = self.load_subset_video_names_scores(dataset_name, video_names, scores, seed)
+                scores = [dataInfo['MOS'][i][0] for i in range(len(dataInfo['MOS']))]
+            if 'train' in dataset_name or 'val' in dataset_name or 'test' in dataset_name:
+                video_names, scores = self.load_subset_video_names_scores(dataset_name, video_names, scores, seed)
         elif dataset_name == 'LIVE_Qualcomm':
             m = scio.loadmat(filename_path)
             dataInfo = pd.DataFrame(m['qualcommVideoData'][0][0][0])
@@ -68,7 +69,8 @@ class VideoDataset(data.Dataset):
             dataInfo['file_names'] = dataInfo['file_names'].str.strip("[']")
             video_names = [video_name.replace('yuv', 'mp4') for video_name in dataInfo['file_names'].tolist()]
             scores = dataInfo['MOS'].tolist()
-            video_names, scores = self.load_subset_video_names_scores(dataset_name, video_names, scores, seed)
+            if 'train' in dataset_name or 'val' in dataset_name or 'test' in dataset_name:
+                video_names, scores = self.load_subset_video_names_scores(dataset_name, video_names, scores, seed)
         elif dataset_name == 'LSVQ_train_all':
             dataInfo = pd.read_csv(filename_path)
             video_names = dataInfo['name'].tolist()
