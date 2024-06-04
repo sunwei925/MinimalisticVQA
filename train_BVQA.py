@@ -19,6 +19,9 @@ from torchvision import transforms
 import time
 
 
+os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+
+
 def main(config):
 
     all_test_SRCC, all_test_KRCC, all_test_PLCC, all_test_RMSE = [], [], [], []

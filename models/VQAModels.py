@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torchvision.models as models
-import clip
 import timm
 
 import math
@@ -248,13 +247,13 @@ class Model_IV(nn.Module):
 
 # Model (V): adding the temporal analyzer to Model (II)
 class Model_V(torch.nn.Module):
-    def __init__(self, config):
+    def __init__(self):
         super(Model_V, self).__init__()
         # define the model (i.e., ResNet-50)
-        model = BaseCNN(config)
+        model = BaseCNN()
         model = torch.nn.DataParallel(model).cuda()
         # load the pre-trained model
-        ckpt = 'ckpts/DataParallel-00008.pt'
+        ckpt = '/home/sunwei/code/VQA/MinimalisticVQA/ckpts/DataParallel-00008.pt'
         checkpoint = torch.load(ckpt)
         model.load_state_dict(checkpoint['state_dict'])
         resnet = nn.Sequential(*list(model.module.backbone.children())[:-2])
@@ -581,16 +580,17 @@ class Model_X(nn.Module):
             
         return x
 
-# Model (X): adding the temporal analyzer to Model (VIII) (load the weights when during the training)
-class Model_XI(nn.Module):
+
+class Model_Swinb_in22k_SlowFast(nn.Module):
     def __init__(self):
-        super(Model_XI, self).__init__()
+        super(Model_Swinb_in22k_SlowFast, self).__init__()
 
         model = timm.create_model('swin_base_patch4_window12_384_in22k', pretrained=True)
         model.head = Identity()
 
         # spatial quality analyzer
         self.feature_extraction = model
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
         # quality regressor
         self.quality = self.quality_regression(1024+256, 128, 1)
@@ -616,10 +616,11 @@ class Model_XI(nn.Module):
 
         # x_temporal_featurs size: (batch * frames) x 256
         x_temporal_featurs = x_temporal_featurs.view(-1, x_temporal_featurs_size[2])
-        
-        
-        
+
         x = self.feature_extraction(x)
+        x = x.permute(0,3,1,2)
+
+        x = self.avgpool(x)
 
         x = torch.flatten(x, 1)
 

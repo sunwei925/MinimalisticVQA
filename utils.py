@@ -3,7 +3,6 @@ from scipy.optimize import curve_fit
 from scipy import stats
 import torch
 import torch.nn.functional as F
-import torchsort
 
 
 import torch.nn as nn
@@ -73,3 +72,10 @@ class Fidelity_Loss(torch.nn.Module):
         loss = 1 - (torch.sqrt(p * g + esp) + torch.sqrt((1 - p) * (1 - g) + esp))
 
         return torch.mean(loss)
+
+
+
+
+
+def read_float_with_comma(num):
+    return float(num.replace(",", "."))

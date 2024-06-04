@@ -160,9 +160,16 @@ class VideoDataset(data.Dataset):
         elif dataset_name == 'LIVEYTGaming':
             dataInfo = scio.loadmat(filename_path)
             video_names = [dataInfo['video_list'][i][0][0] + '.mp4' for i in range(len(dataInfo['video_list']))]
+        elif dataset_name == 'CVD2014':
+            dataInfo = scio.loadmat(filename_path)
+            video_folder = [dataInfo['video_folder'][i][0][0] for i in range(len(dataInfo['video_folder']))]
+            video_names = [video_folder[i][:4]+video_folder[i][5]+'/'+dataInfo['video_name'][i][0][0]+'.avi' for i in range(len(dataInfo['video_name']))]
         elif 'LSVQ' in dataset_name:
             dataInfo = pd.read_csv(filename_path)
             video_names = [dataInfo['name'].iloc[i] + '.mp4' for i in range(len(dataInfo['name']))]
+        elif 'KonVid150k' in dataset_name:
+            dataInfo = pd.read_csv(filename_path)
+            video_names = [dataInfo['video_name'].iloc[i] for i in range(len(dataInfo['video_name']))]
         else:
             raise ValueError(f"Unsupported database name: {dataset_name}")
 
@@ -194,8 +201,10 @@ class VideoDataset(data.Dataset):
         # Define minimum number of clips based on the dataset
         if self.dataset_name == 'KoNViD1k' or 'LSVQ' in self.dataset_name:
             n_clip_min = 8
-        elif self.dataset_name in ['LIVEVQC', 'LIVEYTGaming']:
+        elif self.dataset_name in ['LIVEVQC', 'LIVEYTGaming', 'CVD2014']:
             n_clip_min = 10
+        elif 'KonVid150k' in self.dataset_name:
+            n_clip_min = 5
         elif self.dataset_name == 'LBVD':
             n_clip_min = 10
             n_clip = 10

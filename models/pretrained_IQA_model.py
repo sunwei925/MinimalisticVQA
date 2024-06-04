@@ -40,40 +40,34 @@ class BCNN(nn.Module):
 
 
 class BaseCNN(nn.Module):
-    def __init__(self, config):
+    def __init__(self, backbone='resnet50', std_modeling=True, fc=False, representation='NOTBCNN'):
         """Declare all needed layers."""
         nn.Module.__init__(self)
 
-        self.config = config
-
-
-
-
-
-        if self.config.backbone == 'resnet18':
+        if backbone == 'resnet18':
             self.backbone = models.resnet18(pretrained=True)
-        elif self.config.backbone == 'resnet34':
+        elif backbone == 'resnet34':
             self.backbone = models.resnet34(pretrained=True)
-        elif self.config.backbone == 'resnet50':
+        elif backbone == 'resnet50':
             self.backbone = models.resnet50(pretrained=True)
-        elif self.config.backbone == 'SwinB':
+        elif backbone == 'SwinB':
             self.backbone = models.swin_b(weights='Swin_B_Weights.DEFAULT')
             self.backbone.head = Identity()
-        if config.std_modeling:
+        if std_modeling:
             outdim = 2
         else:
             outdim = 1
-        if config.representation == 'BCNN':
-            assert ((self.config.backbone == 'resnet18') | (self.config.backbone == 'resnet34')), "The backbone network must be resnet18 or resnet34"
+        if representation == 'BCNN':
+            assert ((backbone == 'resnet18') | (backbone == 'resnet34')), "The backbone network must be resnet18 or resnet34"
             self.representation = BCNN()
             self.fc = nn.Linear(512 * 512, outdim)
-        elif self.config.backbone == 'SwinB':
+        elif backbone == 'SwinB':
             self.fc = nn.Linear(1024, outdim)
         else:
             # self.fc = nn.Linear(512, outdim)
             self.fc = nn.Linear(2048, outdim)
 
-        if self.config.fc:
+        if fc:
             # Freeze all previous layers.
             for param in self.backbone.parameters():
                 param.requires_grad = False

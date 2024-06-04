@@ -3,18 +3,18 @@ This is a repository for the models proposed in the paper "Analysis of video qua
 
 
 ### Model Definitions
-| Model | Spatial Quality Analyzer | Temporal Quality Analyzer |
-| ---- |---- |---- |
-|Model I | ResNet-50 (ImageNet-1k) | None |
-|Model II | ResNet-50 (pre-trained on IQA datasets) | None |
-|Model III | ResNet-50 (pre-trained on the LSVQ dataset) | None |
-|Model IV | ResNet-50 (ImageNet-1k) | SlowFast |
-|Model V | ResNet-50 (pre-trained on IQA datasets) | SlowFast |
-|Model VI | ResNet-50 (pre-trained on the LSVQ dataset) | SlowFast |
-|Model VII | Swin-B (ImageNet-1k) | None |
-|Model VIII | Swin-B (pre-trained on the LSVQ dataset) | None |
-|Model IX | Swin-B (ImageNet-1k) | SlowFast |
-|Model X | Swin-B (pre-trained on the LSVQ dataset) | SlowFast |
+| Model | Spatial Quality Analyzer | Temporal Quality Analyzer | Weights trained on LSVQ |
+| ---- |---- |---- | ---- |
+|Model I | ResNet-50 (ImageNet-1k) | None | |
+|Model II | ResNet-50 (pre-trained on IQA datasets) | None | |
+|Model III | ResNet-50 (pre-trained on the LSVQ dataset) | None | |
+|Model IV | ResNet-50 (ImageNet-1k) | SlowFast | |
+|Model V | ResNet-50 (pre-trained on IQA datasets) | SlowFast | |
+|Model VI | ResNet-50 (pre-trained on the LSVQ dataset) | SlowFast | |
+|Model VII | Swin-B (ImageNet-1k) | None | |
+|Model VIII | Swin-B (pre-trained on the LSVQ dataset) | None | |
+|Model IX | Swin-B (ImageNet-1k) | SlowFast | [weights](https://drive.google.com/file/d/1ap4uM1o2pIbVp_ODZ6kd3el1qOEQnj-k/view?usp=sharing) |
+|Model X | Swin-B (pre-trained on the LSVQ dataset) | SlowFast | |
 
 ### Datasets
 
@@ -81,6 +81,7 @@ CUDA_VISIBLE_DEVICES=0,1 python -u train_BVQA.py \
 
 
 ### Test
+
 Download the [Model XI](https://drive.google.com/file/d/1mcJdgYZPybUvLfWTUtZOhktsSsPlekgv/view?usp=sharing) trained on LSVQ. 
 
 ```

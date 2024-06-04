@@ -3,6 +3,10 @@ import pandas as pd
 import cv2
 import argparse
 import scipy.io as scio
+import csv
+
+def read_float_with_comma(num):
+    return float(num.replace(",", "."))
 
 def extract_frame(videos_dir, video_name, size, save_folder, video_length_min):
     """
@@ -168,6 +172,18 @@ def main(config):
             print('start extract {}th video: {}'.format(i, video_name))
             extract_frame(config.videos_dir, video_name, config.resize, config.save_folder, config.video_length_min)
 
+    elif config.dataset == 'KonVid150ka' or config.dataset == 'KonVid150kb': 
+
+        dataInfo = pd.read_csv(config.dataset_file)
+
+        video_names = dataInfo['video_name']
+        n_video = len(video_names)
+        
+        for i in range(n_video):
+            video_name = video_names.iloc[i]
+            print('start extract {}th video: {}'.format(i, video_name))
+            extract_frame(config.videos_dir, video_name, config.resize, config.save_folder, config.video_length_min)
+
     
     if config.dataset == 'KoNViD1k':
 
@@ -252,6 +268,21 @@ def main(config):
 
         for i in range(n_video):
             video_names.append(dataInfo['video_names'][i][0][0])
+
+        for i in range(n_video):
+            video_name = video_names[i]
+            print('start extract {}th video: {}'.format(i, video_name))
+            extract_frame(config.videos_dir, video_name, config.resize, config.save_folder, config.video_length_min)
+
+
+    elif config.dataset == 'CVD2014':
+        dataInfo = scio.loadmat(config.dataset_file)
+        n_video = len(dataInfo['video_name'])
+        video_names = []
+
+        for i in range(n_video):
+            video_folder = dataInfo['video_folder'][i][0][0]
+            video_names.append(video_folder[:4]+video_folder[5]+'/'+dataInfo['video_name'][i][0][0]+'.avi')
 
         for i in range(n_video):
             video_name = video_names[i]

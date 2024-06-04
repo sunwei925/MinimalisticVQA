@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 from PIL import Image
 
@@ -38,10 +37,8 @@ class VideoDataset(data.Dataset):
         Raises:
             ValueError: If the dataset name is not supported.
         """
-
-
         if 'KoNViD1k' in dataset_name or 'youtube_ugc' in dataset_name or 'LIVEVQC' in dataset_name or \
-            'LBVD' in dataset_name or 'LIVEYTGaming' in dataset_name:
+            'LBVD' in dataset_name or 'LIVEYTGaming' in dataset_name or 'CVD2014' in dataset_name:
             dataInfo = scio.loadmat(filename_path)
             if 'KoNViD1k' in dataset_name:
                 video_names = [dataInfo['video_names'][i][0][0] for i in range(len(dataInfo['video_names']))]
@@ -58,6 +55,10 @@ class VideoDataset(data.Dataset):
             elif 'LIVEYTGaming' in dataset_name:
                 video_names = [dataInfo['video_list'][i][0][0]+'.mp4' for i in range(len(dataInfo['video_list']))]
                 scores = [dataInfo['MOS'][i][0] for i in range(len(dataInfo['MOS']))]
+            elif 'CVD2014' in dataset_name:
+                video_folder = [dataInfo['video_folder'][i][0][0] for i in range(len(dataInfo['video_folder']))]
+                video_names = [video_folder[i][:4]+video_folder[i][5]+'/'+dataInfo['video_name'][i][0][0]+'.avi' for i in range(len(dataInfo['video_name']))]
+                scores = [dataInfo['video_score'][i][0] for i in range(len(dataInfo['video_score']))]
             if 'train' in dataset_name or 'val' in dataset_name or 'test' in dataset_name:
                 video_names, scores = self.load_subset_video_names_scores(dataset_name, video_names, scores, seed)
         elif dataset_name == 'LIVE_Qualcomm':
@@ -70,8 +71,8 @@ class VideoDataset(data.Dataset):
             video_names = [video_name.replace('yuv', 'mp4') for video_name in dataInfo['file_names'].tolist()]
             scores = dataInfo['MOS'].tolist()
             if 'train' in dataset_name or 'val' in dataset_name or 'test' in dataset_name:
-                video_names, scores = self.load_subset_video_names_scores(dataset_name, video_names, scores, seed)
-        elif dataset_name == 'LSVQ_train_all':
+                video_names, scores = self.load_subset_video_names_scores(dataset_name, video_names, scores, seed)           
+        elif dataset_name == 'LSVQ_train_all' or dataset_name == 'LSVQ_test' or dataset_name == 'LSVQ_test_1080p':
             dataInfo = pd.read_csv(filename_path)
             video_names = dataInfo['name'].tolist()
             scores = dataInfo['mos'].tolist()
@@ -83,14 +84,10 @@ class VideoDataset(data.Dataset):
             dataInfo = pd.read_csv(filename_path)
             video_names = dataInfo['name'].tolist()[int(len(dataInfo) * 0.8):]
             scores = dataInfo['mos'].tolist()[int(len(dataInfo) * 0.8):]
-        elif dataset_name == 'LSVQ_test':
+        elif dataset_name == 'KonVid150k_train_all' or dataset_name == 'KonVid150k_val':
             dataInfo = pd.read_csv(filename_path)
-            video_names = dataInfo['name'].tolist()
-            scores = dataInfo['mos'].tolist()
-        elif dataset_name == 'LSVQ_test_1080p':
-            dataInfo = pd.read_csv(filename_path)
-            video_names = dataInfo['name'].tolist()
-            scores = dataInfo['mos'].tolist()
+            video_names = dataInfo['video_name'].tolist()
+            scores = dataInfo['video_score'].tolist()
         else:
             raise ValueError(f"Unsupported database name: {dataset_name}")
         
@@ -142,7 +139,8 @@ class VideoDataset(data.Dataset):
             None
         """
         if 'KoNViD1k' in self.dataset_name or 'LIVEVQC' in self.dataset_name or 'youtube_ugc' in self.dataset_name \
-           or 'LIVEYTGaming' in self.dataset_name or 'LBVD' in self.dataset_name or 'LIVE_Qualcomm' in self.dataset_name:
+           or 'LIVEYTGaming' in self.dataset_name or 'LBVD' in self.dataset_name or 'LIVE_Qualcomm' in self.dataset_name\
+            or 'CVD2014' in self.dataset_name or 'KonVid150k' in self.dataset_name:
             video_name = self.video_names[idx]
             video_name_str = video_name[:-4]
         elif 'LSVQ' in self.dataset_name:
@@ -163,6 +161,10 @@ class VideoDataset(data.Dataset):
         if 'KoNViD1k' in self.dataset_name or 'LIVEYTGaming' in self.dataset_name or 'LSVQ' in self.dataset_name \
             or 'LIVEVQC' in self.dataset_name or 'LIVEYTGaming' in self.dataset_name or 'LBVD' in self.dataset_name:
             video_length_read = 8
+        elif 'KonVid150k' in self.dataset_name:
+            video_length_read = 5
+        elif 'CVD2014' in self.dataset_name:
+            video_length_read = 10
         elif 'LIVE_Qualcomm' in self.dataset_name:
             video_length_read = 12
         elif 'youtube_ugc' in self.dataset_name:
