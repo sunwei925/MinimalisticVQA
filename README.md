@@ -2,17 +2,17 @@
 [![Platform](https://img.shields.io/badge/Platform-linux-lightgrey?logo=linux)](https://www.linux.org/)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-orange?logo=python)](https://www.python.org/)
 [![Pytorch](https://img.shields.io/badge/PyTorch-1.13%2B-brightgree?logo=PyTorch)](https://pytorch.org/)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://https://github.com/sunwei925/MinimalisticVQA)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/sunwei925/MinimalisticVQA)
 [![arXiv](https://img.shields.io/badge/build-paper-red?logo=arXiv&label=arXiv)](https://arxiv.org/abs/2307.13981)
 
 
 This is a repository for the models proposed in the paper "Analysis of video quality datasets via design of minimalistic video quality models". [TPAMI Version](https://ieeexplore.ieee.org/abstract/document/10499199) [Arxiv Version](https://arxiv.org/abs/2307.13981)
 
-### Introduction
+## Introduction
 Blind video quality assessment (BVQA) plays an indispensable role in monitoring and improving the end-users' viewing experience in various real-world video-enabled media applications. As an experimental field, the improvements of BVQA models have been measured primarily on a few human-rated VQA datasets. Thus, it is crucial to gain a better understanding of existing VQA datasets in order to properly evaluate the current progress in BVQA. Towards this goal, we conduct a first-of-its-kind computational analysis of VQA datasets via designing minimalistic BVQA models. By minimalistic, we restrict our family of BVQA models to build only upon basic blocks: a video preprocessor (for aggressive spatiotemporal downsampling), a spatial quality analyzer, an optional temporal quality analyzer, and a quality regressor, all with the simplest possible instantiations. By comparing the quality prediction performance of different model variants on eight VQA datasets with realistic distortions, we find that nearly all datasets suffer from the easy dataset problem of varying severity, some of which even admit blind image quality assessment (BIQA) solutions. We additionally justify our claims by comparing our model generalization capabilities on these VQA datasets, and by ablating a dizzying set of BVQA design choices related to the basic building blocks. Our results cast doubt on the current progress in BVQA, and meanwhile shed light on good practices of constructing next-generation VQA datasets and models.
 
 
-### Model Definitions of MinimalisticVQA
+## Model Definitions of MinimalisticVQA
 | Model | Spatial Quality Analyzer | Temporal Quality Analyzer | Weights trained on LSVQ |
 | ---- |---- |---- | ---- |
 |Model I | ResNet-50 (ImageNet-1k) | None | |
@@ -21,10 +21,13 @@ Blind video quality assessment (BVQA) plays an indispensable role in monitoring 
 |Model IV | ResNet-50 (ImageNet-1k) | SlowFast | |
 |Model V | ResNet-50 (pre-trained on IQA datasets) | SlowFast | |
 |Model VI | ResNet-50 (pre-trained on the LSVQ dataset) | SlowFast | |
-|Model VII | Swin-B (ImageNet-1k) | None | |
-|Model VIII | Swin-B (pre-trained on the LSVQ dataset) | None | |
+|Model VII | Swin-B (ImageNet-1k) | None | [weights](https://www.dropbox.com/scl/fi/u2l7y5w77j85lq3108ads/MinimalisticVQA_Model_VII_LSVQ.pth?rlkey=y6vgc8cg3m6mbute68e584rus&st=c67j2jbb&dl=0) |
+|Model VIII | Swin-B (pre-trained on the LSVQ dataset) | None | as above |
 |Model IX | Swin-B (ImageNet-1k) | SlowFast | [weights](https://drive.google.com/file/d/1ap4uM1o2pIbVp_ODZ6kd3el1qOEQnj-k/view?usp=sharing) |
-|Model X | Swin-B (pre-trained on the LSVQ dataset) | SlowFast | --- |
+|Model X | Swin-B (pre-trained on the LSVQ dataset) | SlowFast | as above |
+
+
+## Usaage
 
 ### Test Datasets
 
@@ -108,7 +111,7 @@ CUDA_VISIBLE_DEVICES=0 python -u test_video.py \
 --is_gpu
 ```
 
-### Citation
+## Citation
 **If you find this code is useful for your research, please cite**:
 
 ```latex
