@@ -1,6 +1,6 @@
 import argparse
 import os
-
+import math
 import numpy as np
 import torch
 import torch.nn as nn
@@ -23,8 +23,6 @@ def video_processing_spatial(video_name, resize, video_number_min):
 
     cap=cv2.VideoCapture(video_name)
 
-
-
     if not cap.isOpened():
         print(f"Error: Couldn't open video file {video_name}")
         return
@@ -35,7 +33,6 @@ def video_processing_spatial(video_name, resize, video_number_min):
     video_frame_rate = int(round(cap.get(cv2.CAP_PROP_FPS)))
 
     video_length_read = max(int(video_length/video_frame_rate), video_number_min)
-
 
     video_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) # the heigh of frames
     video_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) # the width of frames
@@ -136,29 +133,35 @@ class slowfast(torch.nn.Module):
             
         return slow_feature, fast_feature
 
-def video_processing_motion(video_name, video_number_min):
+def video_processing_motion(video_name, video_number_min, sample_rate, sample_type, resize):
 
     cap=cv2.VideoCapture(video_name)
+
+    if not cap.isOpened():
+        print(f"Error: Couldn't open video file {video_name}")
+        return
 
     video_channel = 3
 
     video_length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     video_frame_rate = int(round(cap.get(cv2.CAP_PROP_FPS)))
 
-    video_clip = int(video_length/video_frame_rate)
+    # n_clip = int(video_length/video_frame_rate)
+    n_clip = video_number_min
     
-    video_clip_min = max(video_clip, video_number_min)
+    n_clip_min = video_number_min
 
-    video_length_clip = 32
+    n_frame_sample = 32
+    video_length_all = n_clip * video_frame_rate
 
-    transformed_frame_all = torch.zeros([video_length, video_channel, 224, 224])
-    transform = transforms.Compose([transforms.Resize([224, 224]), \
+    transformed_frame_all = torch.zeros([video_length_all, video_channel, resize, resize])
+    transform = transforms.Compose([transforms.Resize([resize, resize]), \
         transforms.ToTensor(), transforms.Normalize(mean = [0.45, 0.45, 0.45], std = [0.225, 0.225, 0.225])])
 
     transformed_video_all = []
     
     video_read_index = 0
-    for i in range(video_length):
+    for i in range(video_length_all):
         has_frames, frame = cap.read()
         if has_frames:
             read_frame = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
@@ -167,25 +170,49 @@ def video_processing_motion(video_name, video_number_min):
             video_read_index += 1
 
 
-    if video_read_index < video_length:
-        for i in range(video_read_index, video_length):
+    if video_read_index < video_length_all:
+        for i in range(video_read_index, video_length_all):
             transformed_frame_all[i] = transformed_frame_all[video_read_index - 1]
 
     cap.release()
 
-    for i in range(video_clip):
-        transformed_video = torch.zeros([video_length_clip, video_channel, 224, 224])
-        if (i*video_frame_rate + video_length_clip) <= video_length:
-            transformed_video = transformed_frame_all[i*video_frame_rate : (i*video_frame_rate + video_length_clip)]
+    # one chunk for a sample rate second video
+    n_chunk = int(math.ceil(n_clip/sample_rate))
+    n_chunk_min = int(math.ceil(n_clip_min/sample_rate))
+
+    for i in range(n_chunk):
+        n_frame_chunk = sample_rate*video_frame_rate
+        # chunk frames
+        if (i+1)*n_frame_chunk < video_length_all:
+            transformed_video_i_chunk = transformed_frame_all[i*n_frame_chunk : (i+1)*n_frame_chunk]
         else:
-            transformed_video[:(video_length - i*video_frame_rate)] = transformed_frame_all[i*video_frame_rate :]
-            for j in range((video_length - i*video_frame_rate), video_length_clip):
-                transformed_video[j] = transformed_video[video_length - i*video_frame_rate - 1]
+            transformed_video_i_chunk = transformed_frame_all[i*n_frame_chunk : video_length_all]
+        
+        transformed_video = torch.zeros([n_frame_sample, video_channel, resize, resize])
+        n_i_chunk = len(transformed_video_i_chunk)
+        # sampling
+        if sample_type == 'mid':
+            mid_frame = int(n_i_chunk/2)
+            if n_frame_sample < n_i_chunk:
+                transformed_video = transformed_video_i_chunk[(mid_frame - int(n_frame_sample/2)) : (mid_frame + int(n_frame_sample/2))]
+            else:
+                transformed_video[ : n_i_chunk] = transformed_video_i_chunk
+                for j in range(n_i_chunk, n_frame_sample):
+                    transformed_video[j] = transformed_video[n_i_chunk - 1]
+        elif sample_type == 'uniform':
+            if n_frame_sample < n_i_chunk:
+                n_interval = int(n_i_chunk/n_frame_sample)
+                transformed_video = transformed_video_i_chunk[0 : n_interval*n_frame_sample : n_interval]
+            else:
+                transformed_video[ : n_i_chunk] = transformed_video_i_chunk
+                for j in range(n_i_chunk, n_frame_sample):
+                    transformed_video[j] = transformed_video[n_i_chunk - 1]
+
         transformed_video_all.append(transformed_video)
 
-    if video_clip < video_clip_min:
-        for i in range(video_clip, video_clip_min):
-            transformed_video_all.append(transformed_video_all[video_clip - 1])
+    if n_chunk < n_chunk_min:
+        for i in range(n_chunk, n_chunk_min):
+            transformed_video_all.append(transformed_video_all[n_chunk - 1])
     
     return transformed_video_all
 
@@ -200,17 +227,43 @@ def main(config):
     model_motion = slowfast()
     model_motion = model_motion.to(device)
 
-    model = VQAModels.Model_XI()
-    # model = torch.nn.DataParallel(model)
+    print('The current model is ' + config.model_name)    
+    if config.model_name == 'Model_I':
+        model = VQAModels.Model_I()
+    elif config.model_name == 'Model_II':
+        model = VQAModels.Model_II()
+    elif config.model_name == 'Model_III':
+        model = VQAModels.Model_III()
+    elif config.model_name == 'Model_IV':
+        model = VQAModels.Model_IV()
+    elif config.model_name == 'Model_V':
+        model = VQAModels.Model_V()
+    elif config.model_name == 'Model_VI':
+        model = VQAModels.Model_VI()
+    elif config.model_name == 'Model_VII':
+        model = VQAModels.Model_VII()
+    elif config.model_name == 'Model_VIII':
+        model = VQAModels.Model_VIII()
+    elif config.model_name == 'Model_IX':
+        model = VQAModels.Model_IX()
+    elif config.model_name == 'Model_X':
+        model = VQAModels.Model_X()
+
     model = model.to(device=device)
     model.load_state_dict(torch.load(config.model_path))
     
 
     video_dist_spatial = video_processing_spatial(os.path.join(config.video_path, config.video_name), config.resize, config.video_number_min)
-    video_dist_motion = video_processing_motion(os.path.join(config.video_path, config.video_name), config.video_number_min)
+    video_dist_motion = video_processing_motion(os.path.join(config.video_path, config.video_name), config.video_number_min, config.sample_rate, config.sample_type, 224)
+    if len(video_dist_spatial) != len(video_dist_motion):
+        if len(video_dist_spatial) > len(video_dist_motion):
+            video_dist_spatial = video_dist_spatial[:len(video_dist_motion)]
+        else:
+            video_dist_motion = video_dist_motion[:len(video_dist_spatial)]
 
     with torch.no_grad():
         model.eval()
+        model_motion.eval()
         
         video_dist_spatial = video_dist_spatial.to(device)
         video_dist_spatial = video_dist_spatial.unsqueeze(dim=0)
@@ -238,7 +291,7 @@ def main(config):
         outputs = model(video_dist_spatial, feature_motion)
         
         y_val = outputs.item()
-        popt = [156.32454676, -43.63788251,  -0.39209656,   4.05073166]
+        popt = [97.8954453, 10.30818116,  -0.72342544,   1.33183837]
         y_val = logistic_func(y_val, *popt)
 
         print('The video name: ' + config.video_name)
@@ -267,10 +320,13 @@ if __name__ == '__main__':
 
     # input parameters
     parser.add_argument('--model_path', type=str)
+    parser.add_argument('--model_name', type=str)
     parser.add_argument('--video_name', type=str, default='')
     parser.add_argument('--video_path', type=str, default='')
     parser.add_argument('--resize', type=int)
     parser.add_argument('--video_number_min', type=int)
+    parser.add_argument('--sample_rate', type=int)
+    parser.add_argument('--sample_type', type=str)
     parser.add_argument('--output', type=str, default='output.txt')
     parser.add_argument('--is_gpu', action='store_true')
   
@@ -278,3 +334,4 @@ if __name__ == '__main__':
     config = parser.parse_args()
 
     main(config)
+

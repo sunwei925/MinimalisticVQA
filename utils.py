@@ -79,3 +79,31 @@ class Fidelity_Loss(torch.nn.Module):
 
 def read_float_with_comma(num):
     return float(num.replace(",", "."))
+
+
+eps = 1e-12
+def loss_m4(y_pred, y):
+    """prediction monotonicity related loss"""
+
+    #assert y_pred.size(0) > 1  #
+
+    preds = y_pred - y_pred.t()
+    gts = y - y.t()
+
+    # signed = torch.sign(gts)
+
+    triu_indices = torch.triu_indices(y_pred.size(0), y_pred.size(0), offset=1)
+    preds = preds[triu_indices[0], triu_indices[1]]
+    gts = gts[triu_indices[0], triu_indices[1]]
+    g = 0.5 * (torch.sign(gts) + 1)
+
+    constant = torch.sqrt(torch.Tensor([2.])).to(preds.device)
+    p = 0.5 * (1 + torch.erf(preds / constant))
+
+    g = g.view(-1, 1)
+    p = p.view(-1, 1)
+
+    loss = torch.mean((1 - (torch.sqrt(p * g + esp) + torch.sqrt((1 - p) * (1 - g) + esp))))
+
+    return loss
+
