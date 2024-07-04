@@ -27,7 +27,7 @@ Blind video quality assessment (BVQA) plays an indispensable role in monitoring 
 |Model X | Swin-B (pre-trained on the LSVQ dataset) | SlowFast | as above |
 
 
-## Usaage
+## Usage
 
 ### Test Datasets
 
