@@ -17,9 +17,7 @@ def logistic_func(X, bayta1, bayta2, bayta3, bayta4):
     yhat = bayta2 + np.divide(bayta1 - bayta2, logisticPart)
     return yhat
 
-def video_processing_spatial(video_name, resize, video_number_min):
-
-    video_name = video_name
+def video_processing_spatial(video_name, resize, crop_size, video_number_min):
 
     cap=cv2.VideoCapture(video_name)
 
@@ -34,6 +32,7 @@ def video_processing_spatial(video_name, resize, video_number_min):
 
     video_length_read = max(int(video_length/video_frame_rate), video_number_min)
 
+
     video_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) # the heigh of frames
     video_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) # the width of frames
     
@@ -46,10 +45,12 @@ def video_processing_spatial(video_name, resize, video_number_min):
 
     dim = (video_width_resize, video_height_resize)
 
-    transformations = transforms.Compose([transforms.Resize(resize),transforms.CenterCrop(resize),transforms.ToTensor(),\
-        transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])])
+    transformations = transforms.Compose([transforms.Resize(resize),\
+                                          transforms.CenterCrop(crop_size),\
+                                          transforms.ToTensor(),\
+                                          transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])])
 
-    transformed_video = torch.zeros([video_length_read, video_channel,  resize, resize])
+    transformed_video = torch.zeros([video_length_read, video_channel,  crop_size, crop_size])
 
     video_read_index = 0
     frame_idx = 0
@@ -59,13 +60,14 @@ def video_processing_spatial(video_name, resize, video_number_min):
         if has_frames:
 
             # key frame
-            if (video_read_index < video_length_read) and (frame_idx % video_frame_rate == 0):
-                read_frame = cv2.resize(frame, dim)
-
+            if (video_read_index < video_length) and (frame_idx % (int(video_frame_rate)) == int(video_frame_rate / 2)):
+                read_frame = cv2.resize(frame, dim)               
                 read_frame = Image.fromarray(cv2.cvtColor(read_frame,cv2.COLOR_BGR2RGB))
                 read_frame = transformations(read_frame)
                 transformed_video[video_read_index] = read_frame
                 video_read_index += 1
+                if video_read_index >= video_length_read:
+                    break
 
             frame_idx += 1
 
@@ -146,8 +148,8 @@ def video_processing_motion(video_name, video_number_min, sample_rate, sample_ty
     video_length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     video_frame_rate = int(round(cap.get(cv2.CAP_PROP_FPS)))
 
-    # n_clip = int(video_length/video_frame_rate)
-    n_clip = video_number_min
+    n_clip = int(video_length/video_frame_rate)
+    # n_clip = video_number_min
     
     n_clip_min = video_number_min
 
@@ -251,9 +253,10 @@ def main(config):
 
     model = model.to(device=device)
     model.load_state_dict(torch.load(config.model_path))
+    popt = np.load(config.popt_path)
     
 
-    video_dist_spatial = video_processing_spatial(os.path.join(config.video_path, config.video_name), config.resize, config.video_number_min)
+    video_dist_spatial = video_processing_spatial(os.path.join(config.video_path, config.video_name), config.resize, config.crop_size, config.video_number_min)
     video_dist_motion = video_processing_motion(os.path.join(config.video_path, config.video_name), config.video_number_min, config.sample_rate, config.sample_type, 224)
     if len(video_dist_spatial) != len(video_dist_motion):
         if len(video_dist_spatial) > len(video_dist_motion):
@@ -288,10 +291,15 @@ def main(config):
         feature_motion = feature_motion.to(device)
         feature_motion = feature_motion.unsqueeze(dim=0)
 
-        outputs = model(video_dist_spatial, feature_motion)
+
+        if config.model_name in ['Model_IV', 'Model_V', 'Model_VI', 'Model_IX', 'Model_X', 'Model_XI']:
+            outputs = model(video_dist_spatial, feature_motion)
+        else:
+            outputs = model(video_dist_spatial)
         
         y_val = outputs.item()
-        popt = [97.8954453, 10.30818116,  -0.72342544,   1.33183837]
+        
+        
         y_val = logistic_func(y_val, *popt)
 
         print('The video name: ' + config.video_name)
@@ -320,13 +328,15 @@ if __name__ == '__main__':
 
     # input parameters
     parser.add_argument('--model_path', type=str)
+    parser.add_argument('--popt_path', type=str)
     parser.add_argument('--model_name', type=str)
-    parser.add_argument('--video_name', type=str, default='')
-    parser.add_argument('--video_path', type=str, default='')
-    parser.add_argument('--resize', type=int)
-    parser.add_argument('--video_number_min', type=int)
-    parser.add_argument('--sample_rate', type=int)
-    parser.add_argument('--sample_type', type=str)
+    parser.add_argument('--video_name', type=str)
+    parser.add_argument('--video_path', type=str)
+    parser.add_argument('--resize', type=int, default=384)
+    parser.add_argument('--crop_size', type=int, default=384)
+    parser.add_argument('--video_number_min', type=int, default=8)
+    parser.add_argument('--sample_rate', type=int, default=1)
+    parser.add_argument('--sample_type', type=str, default='mid')
     parser.add_argument('--output', type=str, default='output.txt')
     parser.add_argument('--is_gpu', action='store_true')
   
@@ -334,4 +344,5 @@ if __name__ == '__main__':
     config = parser.parse_args()
 
     main(config)
+
 

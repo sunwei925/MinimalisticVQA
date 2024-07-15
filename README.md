@@ -14,16 +14,16 @@ Blind video quality assessment (BVQA) plays an indispensable role in monitoring 
 ## Model Definitions of MinimalisticVQA
 | Model | Spatial Quality Analyzer | Temporal Quality Analyzer | Weights trained on LSVQ |
 | ---- |---- |---- | ---- |
-|Model I | ResNet-50 (ImageNet-1k) | None | |
-|Model II | ResNet-50 (pre-trained on IQA datasets) | None | |
+|Model I | ResNet-50 (ImageNet-1k) | None | [weights](https://www.dropbox.com/scl/fi/bmlh7pxqdtmexoz9hrasq/MinimalisticVQA_Model_I_LSVQ.pth?rlkey=lmtz7qnby0mqhlvswukfv54ij&st=wjra1yxp&dl=0) |
+|Model II | ResNet-50 (pre-trained on IQA datasets) | None | as Model I |
 |Model III | ResNet-50 (pre-trained on the LSVQ dataset) | None | |
-|Model IV | ResNet-50 (ImageNet-1k) | SlowFast | |
+|Model IV | ResNet-50 (ImageNet-1k) | SlowFast | [weights](https://www.dropbox.com/scl/fi/vk6z0tbbrmfa2cgc0kwp9/MinimalisticVQA_Model_IV_LSVQ.pth?rlkey=ee6iim2lrehkwq4ppx9iry4a8&st=g088ety0&dl=0) |
 |Model V | ResNet-50 (pre-trained on IQA datasets) | SlowFast | |
 |Model VI | ResNet-50 (pre-trained on the LSVQ dataset) | SlowFast | |
 |Model VII | Swin-B (ImageNet-1k) | None | [weights](https://www.dropbox.com/scl/fi/u2l7y5w77j85lq3108ads/MinimalisticVQA_Model_VII_LSVQ.pth?rlkey=y6vgc8cg3m6mbute68e584rus&st=c67j2jbb&dl=0) |
-|Model VIII | Swin-B (pre-trained on the LSVQ dataset) | None | as above |
+|Model VIII | Swin-B (pre-trained on the LSVQ dataset) | None | as Model VII |
 |Model IX | Swin-B (ImageNet-1k) | SlowFast | [weights](https://drive.google.com/file/d/1ap4uM1o2pIbVp_ODZ6kd3el1qOEQnj-k/view?usp=sharing) |
-|Model X | Swin-B (pre-trained on the LSVQ dataset) | SlowFast | as above |
+|Model X | Swin-B (pre-trained on the LSVQ dataset) | SlowFast | as Model IX |
 
 
 ## Usage
@@ -94,15 +94,17 @@ CUDA_VISIBLE_DEVICES=0,1 python -u train_BVQA.py \
 
 ### Test
 
-Download a trained model (e.g. [Model XI](https://drive.google.com/file/d/1ap4uM1o2pIbVp_ODZ6kd3el1qOEQnj-k/view?usp=sharing) trained on LSVQ). 
+Download a trained model (e.g. [Model XI](https://drive.google.com/file/d/1ap4uM1o2pIbVp_ODZ6kd3el1qOEQnj-k/view?usp=sharing) and [the scaling file](https://www.dropbox.com/scl/fi/odidllh2ighrno7x08ba5/LSVQ_Model_IX.npy?rlkey=w30mcj3o7m5whb9pvzw1boi71&st=kwm63y73&dl=0) (for quality rescaling) trained on LSVQ). 
 
 ```
 CUDA_VISIBLE_DEVICES=0 python -u test_video.py \
---model_path /home/sunwei/code/VQA/SimpleVQA/ckpts/Swin_b_384_in22k_SlowFast_Fast_LSVQ.pth \
+--model_path /data/sunwei_data/video_data/MinimalisticVQA_model/LSVQ/MinimalisticVQA_Model_IX_LSVQ.pth \ # your model file
+--popt_path popt/LSVQ_Model_IX.npy \ # your popt file
 --model_name Model_IX \
---video_name Basketball_-_RB_vs._EP_-_Jan._24_2014.mp4 \
---video_path /data/sunwei_data/LSVQ/ia-batch1 \
+--video_name Zebra_Mussels_Not_Welcome_Here.mp4 \ # your video name
+--video_path /data/sunwei_data/LSVQ/ia-batch1 \ # your video path
 --resize 384 \
+--crop_size 384 \
 --video_number_min 8 \
 --sample_rate 1 \
 --sample_type mid \
@@ -122,6 +124,7 @@ CUDA_VISIBLE_DEVICES=0 python -u test_video.py \
   publisher={IEEE}
 }
 ```
+
 
 
 
